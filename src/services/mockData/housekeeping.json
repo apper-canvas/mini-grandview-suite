@@ -1,0 +1,122 @@
+{
+  "tasks": [
+    {
+      "Id": 1,
+      "roomNumber": "101",
+      "roomId": 1,
+      "status": "pending",
+      "assignedTo": null,
+      "assignedStaff": null,
+      "priority": "high",
+      "estimatedTime": 45,
+      "actualTime": null,
+      "startTime": null,
+      "completedTime": null,
+      "taskType": "checkout_cleaning",
+      "specialInstructions": "Guest reported stained carpet in bedroom area",
+      "supplies": ["carpet cleaner", "vacuum", "fresh linens"],
+      "createdAt": "2024-01-23T08:30:00Z",
+      "createdBy": "System"
+    },
+    {
+      "Id": 2,
+      "roomNumber": "203",
+      "roomId": 8,
+      "status": "in_progress",
+      "assignedTo": 2,
+      "assignedStaff": "Maria Gonzalez",
+      "priority": "medium",
+      "estimatedTime": 30,
+      "actualTime": null,
+      "startTime": "2024-01-23T09:15:00Z",
+      "completedTime": null,
+      "taskType": "maintenance_cleaning",
+      "specialInstructions": "Check bathroom fixtures for leaks",
+      "supplies": ["standard cleaning kit", "plumber tools"],
+      "createdAt": "2024-01-23T08:45:00Z",
+      "createdBy": "John Smith"
+    },
+    {
+      "Id": 3,
+      "roomNumber": "305",
+      "roomId": 15,
+      "status": "quality_check",
+      "assignedTo": 1,
+      "assignedStaff": "Sarah Johnson",
+      "priority": "medium",
+      "estimatedTime": 35,
+      "actualTime": 32,
+      "startTime": "2024-01-23T08:00:00Z",
+      "completedTime": "2024-01-23T08:32:00Z",
+      "taskType": "deep_cleaning",
+      "specialInstructions": "VIP guest arriving at 3 PM",
+      "supplies": ["premium cleaning kit", "fresh flowers", "welcome amenities"],
+      "createdAt": "2024-01-23T07:30:00Z",
+      "createdBy": "Manager"
+    },
+    {
+      "Id": 4,
+      "roomNumber": "102",
+      "roomId": 2,
+      "status": "completed",
+      "assignedTo": 3,
+      "assignedStaff": "David Chen",
+      "priority": "low",
+      "estimatedTime": 25,
+      "actualTime": 28,
+      "startTime": "2024-01-23T07:45:00Z",
+      "completedTime": "2024-01-23T08:13:00Z",
+      "taskType": "standard_cleaning",
+      "specialInstructions": null,
+      "supplies": ["standard cleaning kit"],
+      "createdAt": "2024-01-23T07:00:00Z",
+      "createdBy": "System"
+    }
+  ],
+  "staff": [
+    {
+      "Id": 1,
+      "name": "Sarah Johnson",
+      "role": "Senior Housekeeper",
+      "shift": "morning",
+      "status": "available",
+      "activeAssignments": 1,
+      "completedToday": 3,
+      "rating": 4.9,
+      "specialties": ["deep_cleaning", "vip_service"]
+    },
+    {
+      "Id": 2,
+      "name": "Maria Gonzalez",
+      "role": "Housekeeper",
+      "shift": "morning",
+      "status": "busy",
+      "activeAssignments": 1,
+      "completedToday": 2,
+      "rating": 4.7,
+      "specialties": ["maintenance_cleaning", "standard_cleaning"]
+    },
+    {
+      "Id": 3,
+      "name": "David Chen",
+      "role": "Housekeeper",
+      "shift": "morning",
+      "status": "available",
+      "activeAssignments": 0,
+      "completedToday": 4,
+      "rating": 4.8,
+      "specialties": ["standard_cleaning", "checkout_cleaning"]
+    },
+    {
+      "Id": 4,
+      "name": "Lisa Anderson",
+      "role": "Evening Housekeeper",
+      "shift": "evening",
+      "status": "available",
+      "activeAssignments": 0,
+      "completedToday": 0,
+      "rating": 4.6,
+      "specialties": ["maintenance_cleaning", "inventory"]
+    }
+  ]
+}

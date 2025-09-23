@@ -70,6 +70,17 @@ class RoomService {
     }
 
     return { ...this.rooms[roomIndex] };
+}
+
+  async markCleaningComplete(id) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const roomIndex = this.rooms.findIndex(r => r.Id === parseInt(id));
+    if (roomIndex === -1) {
+      throw new Error(`Room with ID ${id} not found`);
+    }
+
+    return this.updateStatus(id, 'Available');
   }
 
   async updateRoom(id, updateData) {
