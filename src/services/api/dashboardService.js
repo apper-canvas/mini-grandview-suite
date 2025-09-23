@@ -110,6 +110,104 @@ export const dashboardService = {
       chartData,
       paymentRevenue, // Include payment revenue for dashboard integration
       lastUpdated: new Date().toISOString()
-    };
+};
+  },
+
+  // Report aggregation methods
+  async getReportData(metrics, dateRange, filters = {}) {
+    await delay(600);
+    
+    const reportData = {};
+    
+    // Collect data based on requested metrics
+    for (const metric of metrics) {
+      switch (metric) {
+        case 'total_revenue':
+          try {
+            const { default: paymentService } = await import('@/services/api/paymentService');
+            const stats = await paymentService.getStats();
+            reportData.totalRevenue = stats.totalRevenue;
+          } catch (error) {
+            reportData.totalRevenue = 0;
+          }
+          break;
+          
+        case 'occupancy_rate':
+          try {
+            const { roomService } = await import('@/services/api/roomService');
+            const rooms = await roomService.getAll();
+            const occupiedRooms = rooms.filter(r => r.status === 'Occupied').length;
+            reportData.occupancyRate = Math.round((occupiedRooms / rooms.length) * 100);
+          } catch (error) {
+            reportData.occupancyRate = 0;
+          }
+          break;
+          
+        case 'maintenance_requests':
+          try {
+            const { default: maintenanceService } = await import('@/services/api/maintenanceService');
+            const stats = await maintenanceService.getMaintenanceStats();
+            reportData.maintenanceRequests = stats.total;
+          } catch (error) {
+            reportData.maintenanceRequests = 0;
+          }
+          break;
+          
+        case 'staff_performance':
+          try {
+            const { default: staffService } = await import('@/services/api/staffService');
+            const performance = await staffService.getStaffPerformance();
+            reportData.staffPerformance = performance.reduce((sum, p) => sum + p.productivity, 0) / performance.length;
+          } catch (error) {
+            reportData.staffPerformance = 0;
+          }
+          break;
+          
+        default:
+          reportData[metric] = Math.floor(Math.random() * 1000);
+      }
+    }
+    
+    return reportData;
+  },
+
+  async getDetailedReportData(metrics, dateRange, filters = {}) {
+    await delay(800);
+    
+    const detailedData = [];
+    
+    // Generate sample detailed data based on metrics
+    try {
+      if (metrics.includes('bookings_detail')) {
+        const { default: bookingService } = await import('@/services/api/bookingService');
+        const bookings = await bookingService.getAll();
+        detailedData.push(...bookings.map(b => ({
+          type: 'Booking',
+          id: b.Id,
+          guest: b.guestName,
+          room: b.roomNumber,
+          amount: b.totalAmount,
+          status: b.status,
+          date: b.checkInDate
+        })));
+      }
+      
+      if (metrics.includes('payments_detail')) {
+        const { default: paymentService } = await import('@/services/api/paymentService');
+        const payments = await paymentService.getAll();
+        detailedData.push(...payments.map(p => ({
+          type: 'Payment',
+          id: p.Id,
+          amount: p.amount,
+          method: p.method,
+          status: p.status,
+          date: p.processedAt
+        })));
+      }
+    } catch (error) {
+      console.error('Error collecting detailed report data:', error);
+    }
+    
+    return detailedData;
   }
 };
