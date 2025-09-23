@@ -93,11 +93,22 @@ export const dashboardService = {
       this.getChartData()
     ]);
     
+// Get latest payment revenue for real-time updates
+    let paymentRevenue = 0;
+    try {
+      const { default: paymentService } = await import('@/services/api/paymentService');
+      const stats = await paymentService.getStats();
+      paymentRevenue = stats.todaysRevenue || 0;
+    } catch (error) {
+      // Payment service not available, continue without payment data
+    }
+
     return {
       kpiMetrics,
       activities: activities.slice(0, 10), // Only recent activities
       notifications: notifications.slice(0, 8), // Only recent notifications
       chartData,
+      paymentRevenue, // Include payment revenue for dashboard integration
       lastUpdated: new Date().toISOString()
     };
   }

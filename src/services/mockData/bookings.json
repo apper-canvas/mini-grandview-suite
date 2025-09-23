@@ -1,0 +1,62 @@
+[
+  {
+    "Id": 1,
+    "guestName": "Sarah Johnson",
+    "roomNumber": "101",
+    "checkIn": "2024-01-13",
+    "checkOut": "2024-01-15",
+    "totalAmount": 245.00,
+    "paidAmount": 245.00,
+    "status": "confirmed",
+    "email": "sarah.johnson@email.com",
+    "phone": "(555) 123-4567"
+  },
+  {
+    "Id": 2,
+    "guestName": "Michael Chen",
+    "roomNumber": "205",
+    "checkIn": "2024-01-14",
+    "checkOut": "2024-01-17",
+    "totalAmount": 320.00,
+    "paidAmount": 320.00,
+    "status": "confirmed",
+    "email": "michael.chen@email.com",
+    "phone": "(555) 234-5678"
+  },
+  {
+    "Id": 3,
+    "guestName": "Emily Davis",
+    "roomNumber": "312",
+    "checkIn": "2024-01-15",
+    "checkOut": "2024-01-16",
+    "totalAmount": 189.00,
+    "paidAmount": 0.00,
+    "status": "pending_payment",
+    "email": "emily.davis@email.com",
+    "phone": "(555) 345-6789"
+  },
+  {
+    "Id": 4,
+    "guestName": "Robert Wilson",
+    "roomNumber": "408",
+    "checkIn": "2024-01-12",
+    "checkOut": "2024-01-16",
+    "totalAmount": 425.50,
+    "paidAmount": 425.50,
+    "status": "confirmed",
+    "email": "robert.wilson@email.com",
+    "phone": "(555) 456-7890"
+  },
+  {
+    "Id": 5,
+    "guestName": "Lisa Anderson",
+    "roomNumber": "201",
+    "checkIn": "2024-01-14",
+    "checkOut": "2024-01-15",
+    "totalAmount": 156.75,
+    "paidAmount": 0.00,
+    "status": "pending_payment",
+    "email": "lisa.anderson@email.com",
+    "phone": "(555) 567-8901"
+  }
+]
