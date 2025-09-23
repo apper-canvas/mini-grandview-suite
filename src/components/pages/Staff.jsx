@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent } from "@/components/atoms/Card";
 import Button from "@/components/atoms/Button";
-import { Badge } from "@/components/atoms/Badge";
+import Badge from "@/components/atoms/Badge";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import { staffService } from "@/services/api/staffService";
