@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardHeader, CardContent } from "@/components/atoms/Card";
-import { Button } from "@/components/atoms/Button";
-import { Badge } from "@/components/atoms/Badge";
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader } from "@/components/atoms/Card";
 import ApperIcon from "@/components/ApperIcon";
-import { Loading } from "@/components/ui/Loading";
-import { Error } from "@/components/ui/Error";
-import { maintenanceService } from "@/services/api/maintenanceService";
+import Error from "@/components/ui/Error";
+import Loading from "@/components/ui/Loading";
+import Button from "@/components/atoms/Button";
+import Badge from "@/components/atoms/Badge";
 import { cn } from "@/utils/cn";
+import maintenanceService from "@/services/api/maintenanceService";
 
 const Maintenance = () => {
   const [workOrders, setWorkOrders] = useState([]);
@@ -52,25 +52,26 @@ const Maintenance = () => {
     return workOrders.filter(order => order.status === selectedFilter);
   };
 
-// Utility functions for color styling - accessible to all components in this file
-const getPriorityColor = (priority) => {
-  switch (priority) {
-    case 'high': return 'bg-red-100 text-red-800 border-red-200';
-    case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'low': return 'bg-green-100 text-green-800 border-green-200';
-    default: return 'bg-slate-100 text-slate-800 border-slate-200';
-  }
-};
+  // Helper functions for styling
+  // Helper functions for styling
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'high': return 'bg-red-100 text-red-800 border-red-200';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'low': return 'bg-green-100 text-green-800 border-green-200';
+      default: return 'bg-slate-100 text-slate-800 border-slate-200';
+    }
+  };
 
-const getStatusColor = (status) => {
-  switch (status) {
-    case 'open': return 'bg-blue-100 text-blue-800 border-blue-200';
-    case 'in_progress': return 'bg-purple-100 text-purple-800 border-purple-200';
-    case 'completed': return 'bg-green-100 text-green-800 border-green-200';
-    case 'on_hold': return 'bg-gray-100 text-gray-800 border-gray-200';
-    default: return 'bg-slate-100 text-slate-800 border-slate-200';
-  }
-};
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'open': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'in_progress': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'completed': return 'bg-green-100 text-green-800 border-green-200';
+      case 'on_hold': return 'bg-gray-100 text-gray-800 border-gray-200';
+      default: return 'bg-slate-100 text-slate-800 border-slate-200';
+    }
+  };
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -398,18 +399,18 @@ const WorkOrderDetailsModal = ({ workOrder, isOpen, onClose, onUpdate }) => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <h4 className="font-medium mb-1">Priority</h4>
-              <Badge className={`${getPriorityColor(workOrder.priority)} inline-flex`}>
+<Badge className="bg-red-100 text-red-800 border-red-200 inline-flex">
                 {workOrder.priority.toUpperCase()}
               </Badge>
             </div>
             <div>
               <h4 className="font-medium mb-1">Status</h4>
-              <Badge className={`${getStatusColor(workOrder.status)} inline-flex`}>
+              <Badge className="bg-blue-100 text-blue-800 border-blue-200 inline-flex">
                 {workOrder.status.replace('_', ' ').toUpperCase()}
               </Badge>
             </div>
           </div>
-          {workOrder.notes.length > 0 && (
+{workOrder.notes && workOrder.notes.length > 0 && (
             <div>
               <h4 className="font-medium mb-2">Notes</h4>
               <div className="space-y-2">
