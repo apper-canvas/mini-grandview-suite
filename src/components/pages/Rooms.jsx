@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader } from "@/components/atoms/Card";
+import React, { useState, useEffect } from "react";
+import { Card, CardHeader, CardContent } from "@/components/atoms/Card";
+import ApperIcon from "@/components/ApperIcon";
+import Badge from "@/components/atoms/Badge";
+import Button from "@/components/atoms/Button";
+import RoomDetailsModal from "@/components/molecules/RoomDetailsModal";
 import { roomService } from "@/services/api/roomService";
 import { toast } from "react-toastify";
-import ApperIcon from "@/components/ApperIcon";
-import RoomDetailsModal from "@/components/molecules/RoomDetailsModal";
-import Loading from "@/components/ui/Loading";
-import Button from "@/components/atoms/Button";
-import Badge from "@/components/atoms/Badge";
 const Rooms = () => {
-  const [rooms, setRooms] = useState([]);
+const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [statusFilter, setStatusFilter] = useState('All');
@@ -18,7 +17,6 @@ const Rooms = () => {
   const [bulkActionMode, setBulkActionMode] = useState(false);
   const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0, room: null });
   const [showBulkActions, setShowBulkActions] = useState(false);
-  
   useEffect(() => {
     loadRooms();
   }, []);
@@ -37,23 +35,18 @@ const Rooms = () => {
 
   const handleStatusChange = async (roomId, newStatus) => {
     try {
-      await roomService.updateRoomStatus(roomId, newStatus);
-      setRooms(prev => prev.map(room =>
+      await roomService.updateStatus(roomId, newStatus);
+      setRooms(prev => prev.map(room => 
         room.Id === roomId 
           ? { ...room, status: newStatus, lastUpdated: new Date().toISOString() }
           : room
       ));
-      
-      const updatedRoom = rooms.find(r => r.Id === roomId);
-      if (newStatus === 'occupied') {
-        toast.success(`Room ${updatedRoom?.roomNumber} is now occupied - Guest checked in successfully`);
-      } else {
-        toast.success(`Room ${updatedRoom?.roomNumber} status updated to ${newStatus}`);
-      }
+      toast.success(`Room ${rooms.find(r => r.Id === roomId)?.roomNumber} status updated to ${newStatus}`);
     } catch (error) {
       toast.error('Failed to update room status');
     }
-  };
+};
+
   const handleRoomClick = (room, e) => {
     if (bulkActionMode) {
       e.preventDefault();
