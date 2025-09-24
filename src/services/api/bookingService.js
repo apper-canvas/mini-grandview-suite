@@ -4,6 +4,9 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 let bookings = [...bookingsData];
 
+// Audit log storage
+let auditLog = [];
+
 const bookingService = {
   // Get all bookings
   async getAll() {
@@ -21,10 +24,96 @@ const bookingService = {
     return { ...booking };
   },
 
-// Get unpaid bookings
+  // Get unpaid bookings
   async getUnpaidBookings() {
     await delay(250);
     return bookings.filter(b => b.paidAmount < b.totalAmount);
+  },
+
+  // Get filtered bookings
+  async getFilteredBookings(filters) {
+    await delay(300);
+    let filtered = [...bookings];
+    
+    if (filters.status) {
+      filtered = filtered.filter(b => b.status === filters.status);
+    }
+    
+    if (filters.dateFrom) {
+      filtered = filtered.filter(b => new Date(b.checkIn) >= new Date(filters.dateFrom));
+    }
+    
+    if (filters.dateTo) {
+      filtered = filtered.filter(b => new Date(b.checkOut) <= new Date(filters.dateTo));
+    }
+    
+    if (filters.guestName) {
+      filtered = filtered.filter(b => 
+        b.guestName.toLowerCase().includes(filters.guestName.toLowerCase())
+      );
+    }
+    
+    return filtered;
+  },
+
+  // Update booking status
+  async updateBookingStatus(id, newStatus) {
+    await delay(400);
+    const bookingIndex = bookings.findIndex(b => b.Id === parseInt(id));
+    if (bookingIndex === -1) {
+      throw new Error(`Booking with ID ${id} not found`);
+    }
+    
+    const oldStatus = bookings[bookingIndex].status;
+    bookings[bookingIndex].status = newStatus;
+    bookings[bookingIndex].updatedAt = new Date().toISOString();
+    
+    // Log audit entry
+    this.logAuditEntry({
+      bookingId: parseInt(id),
+      action: 'status_update',
+      oldValue: oldStatus,
+      newValue: newStatus,
+      timestamp: new Date().toISOString(),
+      user: 'System' // In real app, would be current user
+    });
+    
+    // Trigger housekeeping notification if needed
+    if (newStatus === 'confirmed' || newStatus === 'checked_out') {
+      await this.notifyHousekeeping(bookings[bookingIndex]);
+    }
+    
+    return { ...bookings[bookingIndex] };
+  },
+
+  // Log audit entry
+  logAuditEntry(entry) {
+    auditLog.push({
+      id: auditLog.length + 1,
+      ...entry
+    });
+  },
+
+  // Get audit log for booking
+  async getAuditLog(bookingId) {
+    await delay(200);
+    return auditLog.filter(entry => entry.bookingId === parseInt(bookingId));
+  },
+
+  // Notify housekeeping service
+  async notifyHousekeeping(booking) {
+    try {
+      // In real implementation, this would call housekeeping service
+      console.log(`Housekeeping notified for room ${booking.roomNumber}`, {
+        bookingId: booking.Id,
+        guestName: booking.guestName,
+        status: booking.status,
+        checkIn: booking.checkIn,
+        checkOut: booking.checkOut
+      });
+    } catch (error) {
+      console.error('Failed to notify housekeeping:', error);
+    }
   },
 
   // Search available rooms
@@ -127,6 +216,17 @@ const bookingService = {
     };
     
     bookings.push(newBooking);
+    
+    // Log audit entry
+    this.logAuditEntry({
+      bookingId: newBooking.Id,
+      action: 'booking_created',
+      oldValue: null,
+      newValue: newBooking,
+      timestamp: new Date().toISOString(),
+      user: 'System'
+    });
+    
     return { ...newBooking };
   },
 
@@ -138,12 +238,24 @@ const bookingService = {
       throw new Error(`Booking with ID ${id} not found`);
     }
     
+    const oldBooking = { ...bookings[bookingIndex] };
+    
     bookings[bookingIndex] = {
       ...bookings[bookingIndex],
       ...updateData,
       Id: parseInt(id),
       updatedAt: new Date().toISOString()
     };
+    
+    // Log audit entry
+    this.logAuditEntry({
+      bookingId: parseInt(id),
+      action: 'booking_updated',
+      oldValue: oldBooking,
+      newValue: bookings[bookingIndex],
+      timestamp: new Date().toISOString(),
+      user: 'System'
+    });
     
     return { ...bookings[bookingIndex] };
   },
@@ -156,7 +268,20 @@ const bookingService = {
       throw new Error(`Booking with ID ${id} not found`);
     }
     
+    const deletedBooking = { ...bookings[index] };
+    
     bookings.splice(index, 1);
+    
+    // Log audit entry
+    this.logAuditEntry({
+      bookingId: parseInt(id),
+      action: 'booking_deleted',
+      oldValue: deletedBooking,
+      newValue: null,
+      timestamp: new Date().toISOString(),
+      user: 'System'
+    });
+    
     return { success: true };
   }
 };
