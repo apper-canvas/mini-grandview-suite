@@ -318,7 +318,7 @@ return { ...this.rooms[roomIndex] };
     return { ...this.rooms[roomIndex] };
   }
 
-  async addNote(roomId, noteContent) {
+async addNote(roomId, noteContent) {
     await new Promise(resolve => setTimeout(resolve, 400));
     
     const roomIndex = this.rooms.findIndex(r => r.Id === parseInt(roomId));
@@ -360,7 +360,23 @@ return { ...this.rooms[roomIndex] };
       lastUpdated: new Date().toISOString()
     };
 
-return { ...this.rooms[roomIndex] };
+    return { ...this.rooms[roomIndex] };
+  }
+
+  async searchRooms(query) {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    if (!query || query.trim() === '') {
+      return [...this.rooms];
+    }
+
+    const searchTerm = query.toLowerCase().trim();
+    
+    return this.rooms.filter(room => 
+      room.roomNumber.toString().toLowerCase().includes(searchTerm) ||
+      (room.guestName && room.guestName.toLowerCase().includes(searchTerm)) ||
+      (room.bookingId && room.bookingId.toString().toLowerCase().includes(searchTerm))
+    );
   }
 }
 
