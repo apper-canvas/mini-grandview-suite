@@ -360,7 +360,6 @@ return { ...this.rooms[roomIndex] };
       lastUpdated: new Date().toISOString()
     };
 
-    return { ...this.rooms[roomIndex] };
 return { ...this.rooms[roomIndex] };
   }
 }
