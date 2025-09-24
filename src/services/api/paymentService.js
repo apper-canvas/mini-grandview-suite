@@ -37,8 +37,21 @@ const paymentService = {
     payments.push(newPayment);
     return { ...newPayment };
   },
+async createPendingPayment(paymentData) {
+    await delay(300); // Simulate API call
+    
+    const pendingPayment = {
+      ...paymentData,
+      Id: Math.max(...payments.map(p => p.Id), 0) + 1,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      transactionId: `PND_${new Date().getFullYear()}_${String(Math.max(...payments.map(p => p.Id), 0) + 1).padStart(3, '0')}`
+    };
+    
+    payments.push(pendingPayment);
+    return { ...pendingPayment };
+  },
 
-// Process payment
   async processPayment(paymentData) {
     await delay(800); // Simulate payment processing time
     
