@@ -70,6 +70,41 @@
   @apply bg-slate-300 rounded-full;
 }
 
-::-webkit-scrollbar-thumb:hover {
+:::-webkit-scrollbar-thumb:hover {
   @apply bg-slate-400;
+}
+
+/* Range Slider Styling */
+.range-slider-min::-webkit-slider-thumb,
+.range-slider-max::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #1e40af;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.range-slider-min::-moz-range-thumb,
+.range-slider-max::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #1e40af;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.range-slider-min::-webkit-slider-track,
+.range-slider-max::-webkit-slider-track {
+  background: linear-gradient(to right, #e2e8f0, #1e40af, #e2e8f0);
+  height: 8px;
+  border-radius: 4px;
+}
+
+.range-slider-max {
+  background: transparent;
 }

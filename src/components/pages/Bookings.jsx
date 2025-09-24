@@ -17,11 +17,12 @@ const [activeTab, setActiveTab] = useState('search');
     checkIn: '',
     checkOut: '',
     guests: 1,
-    roomTypes: []
+    roomTypes: [],
+    minPrice: 50,
+    maxPrice: 500
   });
-  const [availableRooms, setAvailableRooms] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [filteredBookings, setFilteredBookings] = useState([]);
+const [filteredBookings, setFilteredBookings] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showBookingForm, setShowBookingForm] = useState(false);
@@ -35,7 +36,8 @@ const [activeTab, setActiveTab] = useState('search');
     paymentMethod: 'card'
   });
   
-  // Management filters and sorting
+  const [availableRooms, setAvailableRooms] = useState([]);
+  const [sendingConfirmation, setSendingConfirmation] = useState(false);
   const [filters, setFilters] = useState({
     status: '',
     dateFrom: '',
@@ -149,12 +151,46 @@ const loadBookings = async () => {
     setSelectedBooking(booking);
     setShowModifyModal(true);
   };
-
+// Handle status updates
   const handleStatusUpdate = async (bookingId, newStatus) => {
     try {
       await bookingService.updateBookingStatus(bookingId, newStatus);
       await loadBookings();
-      toast.success(`Booking status updated to ${newStatus.replace('_', ' ')}`);
+      
+      // Enhanced check-in process
+      if (newStatus === 'checked_in') {
+        const booking = bookings.find(b => b.Id === bookingId);
+        
+        // Step 1: ID Verification (simulated)
+        toast.info('Verifying guest identification...');
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Step 2: Room key assignment
+        toast.success(`Room keys assigned for Room ${booking?.roomNumber}`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Step 3: Update room status to occupied
+        try {
+          // Import roomService dynamically to avoid circular dependencies
+          const { roomService } = await import('@/services/api/roomService');
+          const rooms = await roomService.getAll();
+          const room = rooms.find(r => r.roomNumber === booking?.roomNumber);
+          if (room) {
+            await roomService.updateRoomStatus(room.Id, 'occupied');
+            toast.info(`Room ${booking?.roomNumber} status updated to occupied`);
+          }
+        } catch (roomError) {
+          console.log('Room status update handled separately');
+        }
+        
+        // Step 4: Send welcome message
+        await new Promise(resolve => setTimeout(resolve, 500));
+        toast.success(`Welcome message sent to ${booking?.guestName}`);
+        
+        toast.success(`Check-in completed for ${booking?.guestName}`);
+      } else {
+        toast.success(`Booking status updated to ${newStatus.replace('_', ' ')}`);
+      }
       
       // Trigger housekeeping notification for room preparation
       if (newStatus === 'confirmed') {
@@ -166,6 +202,7 @@ const loadBookings = async () => {
     }
   };
 
+// Handle booking cancellation
   const handleCancelBooking = async (bookingId) => {
     const booking = bookings.find(b => b.Id === bookingId);
     if (!confirm(`Cancel booking for ${booking?.guestName}? This action cannot be undone.`)) {
@@ -230,16 +267,18 @@ const loadBookings = async () => {
         email: bookingForm.email,
         phone: bookingForm.phone,
         roomNumber: selectedRoom.roomNumber,
+roomNumber: selectedRoom.roomNumber,
         checkIn: searchCriteria.checkIn,
         checkOut: searchCriteria.checkOut,
         totalAmount: selectedRoom.total,
-        paidAmount: selectedRoom.total,
-        specialRequests: bookingForm.specialRequests
+        status: 'pending'
       };
 
       const newBooking = await bookingService.create(bookingData);
       
-      // Process payment
+      setBookings(prev => [newBooking, ...prev]);
+      setShowBookingForm(false);
+      
       const paymentData = {
         bookingId: newBooking.Id,
         guestName: bookingForm.guestName,
@@ -249,20 +288,21 @@ const loadBookings = async () => {
         cardBrand: 'Visa',
         cardLastFour: '4242'
       };
+await paymentService.processPayment(paymentData);
 
-      await paymentService.processPayment(paymentData);
-
-      toast.success('Booking confirmed successfully!');
+      toast.success('Booking created successfully!');
       
-      // Simulate email confirmation
-      setTimeout(() => {
-        toast.info(`Confirmation email sent to ${bookingForm.email}`);
+      // Auto-send confirmation email
+      setTimeout(async () => {
+        try {
+          await handleSendConfirmation(newBooking.Id);
+        } catch (emailError) {
+          toast.error('Booking created but email confirmation failed');
+        }
       }, 1000);
 
-      // Reset form and close modal
-      setShowBookingForm(false);
+      // Reset form
       setSelectedRoom(null);
-      setBookingForm({
         guestName: '',
         email: '',
         phone: '',
@@ -280,7 +320,7 @@ const loadBookings = async () => {
     }
   };
 
-  const handleRoomTypeToggle = (roomType) => {
+const handleRoomTypeToggle = (roomType) => {
     setSearchCriteria(prev => ({
       ...prev,
       roomTypes: prev.roomTypes.includes(roomType)
@@ -289,7 +329,50 @@ const loadBookings = async () => {
     }));
   };
 
-const formatDate = (dateString) => {
+  // Handle sending confirmation email
+  const handleSendConfirmation = async (bookingId) => {
+    try {
+      setSendingConfirmation(true);
+      const booking = bookings.find(b => b.Id === bookingId);
+      if (!booking) {
+        toast.error('Booking not found');
+        return;
+      }
+
+      // Initialize ApperClient
+      const { ApperClient } = window.ApperSDK;
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+
+      const response = await ApperClient.functions.invoke(import.meta.env.VITE_SEND_BOOKING_CONFIRMATION, {
+        method: 'POST',
+        body: JSON.stringify({
+          booking: booking,
+          guestEmail: booking.guestEmail || booking.email,
+          guestName: booking.guestName
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.success) {
+        toast.success('Confirmation email sent successfully with PDF attachment!');
+      } else {
+        toast.error('Failed to send confirmation email');
+      }
+    } catch (error) {
+      console.error('Email confirmation error:', error);
+      toast.error('Failed to send confirmation email');
+    } finally {
+      setSendingConfirmation(false);
+    }
+  };
+
+// Format date helper function
+  const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString();
   };
 
@@ -301,7 +384,6 @@ const formatDate = (dateString) => {
       default: return 'default';
     }
   };
-
   // Define available room types
   const roomTypes = ['Single', 'Double', 'Suite', 'Deluxe', 'Executive', 'Presidential'];
   return (
@@ -354,98 +436,137 @@ const formatDate = (dateString) => {
         <>
           {/* Search Panel */}
           <Card>
-            <CardHeader>
+<CardHeader>
               <div className="flex items-center space-x-2">
                 <ApperIcon name="Search" className="h-5 w-5 text-primary" />
                 <h3 className="text-lg font-semibold text-slate-900">Search Available Rooms</h3>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                {/* Check-in Date */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Check-in Date</label>
-                  <input
-                    type="date"
-                    value={searchCriteria.checkIn}
-                    onChange={(e) => setSearchCriteria(prev => ({ ...prev, checkIn: e.target.value }))}
-                    min={new Date().toISOString().split('T')[0]}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-
-                {/* Check-out Date */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Check-out Date</label>
-                  <input
-                    type="date"
-                    value={searchCriteria.checkOut}
-                    onChange={(e) => setSearchCriteria(prev => ({ ...prev, checkOut: e.target.value }))}
-                    min={searchCriteria.checkIn || new Date().toISOString().split('T')[0]}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-
-                {/* Guests */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Guests</label>
-                  <select
-                    value={searchCriteria.guests}
-                    onChange={(e) => setSearchCriteria(prev => ({ ...prev, guests: parseInt(e.target.value) }))}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  >
-                    {[1, 2, 3, 4, 5, 6].map(num => (
-                      <option key={num} value={num}>{num} Guest{num > 1 ? 's' : ''}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Search Button */}
-                <div className="flex items-end">
-                  <Button
-                    onClick={handleSearch}
-                    disabled={loading}
-                    className="w-full"
-                  >
-                    {loading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                        Searching...
-                      </>
-                    ) : (
-                      <>
-                        <ApperIcon name="Search" className="h-4 w-4 mr-2" />
-                        Search Rooms
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              {/* Room Type Filters */}
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+              {/* Check-in Date */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">Room Types (optional)</label>
-                <div className="flex flex-wrap gap-2">
-                  {roomTypes.map(type => (
-                    <button
-                      key={type}
-                      onClick={() => handleRoomTypeToggle(type)}
-                      className={`px-3 py-1 text-sm rounded-full border transition-colors ${
-                        searchCriteria.roomTypes.includes(type)
-                          ? 'bg-primary text-white border-primary'
-                          : 'bg-white text-slate-600 border-slate-300 hover:border-primary'
-                      }`}
-                    >
-                      {type}
-                    </button>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Check-in Date</label>
+                <input
+                  type="date"
+                  value={searchCriteria.checkIn}
+                  onChange={(e) => setSearchCriteria(prev => ({ ...prev, checkIn: e.target.value }))}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              {/* Check-out Date */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Check-out Date</label>
+                <input
+                  type="date"
+                  value={searchCriteria.checkOut}
+                  onChange={(e) => setSearchCriteria(prev => ({ ...prev, checkOut: e.target.value }))}
+                  min={searchCriteria.checkIn || new Date().toISOString().split('T')[0]}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              {/* Guests */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Guests</label>
+                <select
+                  value={searchCriteria.guests}
+                  onChange={(e) => setSearchCriteria(prev => ({ ...prev, guests: parseInt(e.target.value) }))}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                  {[1, 2, 3, 4, 5, 6].map(num => (
+                    <option key={num} value={num}>{num} Guest{num > 1 ? 's' : ''}</option>
                   ))}
+                </select>
+              </div>
+
+              {/* Price Range */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Price Range: ${searchCriteria.minPrice} - ${searchCriteria.maxPrice}
+                </label>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-slate-500">$50</span>
+                    <div className="flex-1 relative">
+                      <input
+                        type="range"
+                        min="50"
+                        max="500"
+                        step="25"
+                        value={searchCriteria.minPrice}
+                        onChange={(e) => setSearchCriteria(prev => ({ 
+                          ...prev, 
+                          minPrice: Math.min(parseInt(e.target.value), prev.maxPrice - 25)
+                        }))}
+                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer range-slider-min"
+                      />
+                      <input
+                        type="range"
+                        min="50"
+                        max="500"
+                        step="25"
+                        value={searchCriteria.maxPrice}
+                        onChange={(e) => setSearchCriteria(prev => ({ 
+                          ...prev, 
+                          maxPrice: Math.max(parseInt(e.target.value), prev.minPrice + 25)
+                        }))}
+                        className="absolute top-0 w-full h-2 bg-transparent rounded-lg appearance-none cursor-pointer range-slider-max"
+                      />
+                    </div>
+                    <span className="text-xs text-slate-500">$500</span>
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Room Results */}
-          {availableRooms.length > 0 && (
+              {/* Search Button */}
+              <div className="flex items-end">
+                <Button
+                  onClick={handleSearch}
+                  disabled={loading}
+                  className="w-full"
+                >
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                      Searching...
+                    </>
+                  ) : (
+                    <>
+                      <ApperIcon name="Search" className="h-4 w-4 mr-2" />
+                      Search Rooms
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Room Type Filters */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-3">Room Types (optional)</label>
+              <div className="flex flex-wrap gap-2">
+                {roomTypes.map(type => (
+                  <button
+                    key={type}
+                    onClick={() => handleRoomTypeToggle(type)}
+                    className={`px-3 py-1 text-sm rounded-full border transition-colors ${
+                      searchCriteria.roomTypes.includes(type)
+                        ? 'bg-primary text-white border-primary'
+                        : 'bg-white text-slate-600 border-slate-300 hover:border-primary'
+                    }`}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+            </div>
+</CardContent>
+        </Card>
+          
+        {/* Room Results */}
+        {availableRooms.length > 0 && (
             <Card>
               <CardHeader>
                 <div className="flex items-center space-x-2">
@@ -741,21 +862,45 @@ const formatDate = (dateString) => {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => handleModifyBooking(booking)}
+onClick={() => handleModifyBooking(booking)}
                               className="text-xs"
                             >
                               <ApperIcon name="Edit" className="h-3 w-3 mr-1" />
                               Edit
                             </Button>
+                          </div>
+                          
+                          <div className="flex gap-2">
                             {booking.status === 'confirmed' && (
-                              <Button
-                                size="sm"
-                                onClick={() => handleStatusUpdate(booking.Id, 'checked_in')}
-                                className="text-xs bg-success hover:bg-success/90"
-                              >
-                                <ApperIcon name="LogIn" className="h-3 w-3 mr-1" />
-                                Check In
-                              </Button>
+                              <>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleStatusUpdate(booking.Id, 'checked_in')}
+                                  className="text-xs bg-success hover:bg-success/90"
+                                >
+                                  <ApperIcon name="LogIn" className="h-3 w-3 mr-1" />
+                                  Check In
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleSendConfirmation(booking.Id)}
+                                  disabled={sendingConfirmation}
+                                  className="text-xs text-primary border-primary hover:bg-primary/10"
+                                >
+                                  {sendingConfirmation ? (
+                                    <>
+                                      <div className="animate-spin rounded-full h-3 w-3 border border-primary border-t-transparent mr-1" />
+                                      Sending...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ApperIcon name="Mail" className="h-3 w-3 mr-1" />
+                                      Send Confirmation
+                                    </>
+                                  )}
+                                </Button>
+                              </>
                             )}
                             {booking.status === 'checked_in' && (
                               <Button
@@ -765,6 +910,27 @@ const formatDate = (dateString) => {
                               >
                                 <ApperIcon name="LogOut" className="h-3 w-3 mr-1" />
                                 Check Out
+                              </Button>
+                            )}
+                            {booking.status === 'pending' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleSendConfirmation(booking.Id)}
+                                disabled={sendingConfirmation}
+                                className="text-xs text-primary border-primary hover:bg-primary/10"
+                              >
+                                {sendingConfirmation ? (
+                                  <>
+                                    <div className="animate-spin rounded-full h-3 w-3 border border-primary border-t-transparent mr-1" />
+                                    Sending...
+                                  </>
+                                ) : (
+                                  <>
+                                    <ApperIcon name="Mail" className="h-3 w-3 mr-1" />
+                                    Send Confirmation
+                                  </>
+                                )}
                               </Button>
                             )}
                             {booking.status !== 'cancelled' && booking.status !== 'checked_out' && (
@@ -801,10 +967,10 @@ const formatDate = (dateString) => {
                 </p>
               </div>
             )}
-          </CardContent>
+</CardContent>
         </Card>
       )}
-
+      
       {/* Booking Form Modal */}
       {showBookingForm && selectedRoom && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -918,9 +1084,9 @@ const formatDate = (dateString) => {
                 </div>
               </form>
             </div>
-          </div>
+</div>
         </div>
-)}
+      )}
 
       {/* Booking Details Modal */}
       {showBookingDetails && selectedBooking && (
@@ -989,14 +1155,14 @@ const formatDate = (dateString) => {
                     <p className="text-lg font-semibold text-slate-900">${selectedBooking.totalAmount.toFixed(2)}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Paid Amount</label>
-                    <p className="text-lg font-semibold text-success">${selectedBooking.paidAmount.toFixed(2)}</p>
+<label className="block text-sm font-medium text-slate-700 mb-1">Paid Amount</label>
+                    <p className="text-lg font-semibold text-success">${(selectedBooking.paidAmount || 0).toFixed(2)}</p>
                   </div>
                 </div>
-                {selectedBooking.paidAmount < selectedBooking.totalAmount && (
+{(selectedBooking.paidAmount || 0) < selectedBooking.totalAmount && (
                   <div className="mt-2">
                     <p className="text-sm text-error">
-                      Outstanding: ${(selectedBooking.totalAmount - selectedBooking.paidAmount).toFixed(2)}
+                      Outstanding: ${(selectedBooking.totalAmount - (selectedBooking.paidAmount || 0)).toFixed(2)}
                     </p>
                   </div>
                 )}

@@ -1,4 +1,6 @@
+import React from "react";
 import bookingsData from "@/services/mockData/bookings.json";
+import Error from "@/components/ui/Error";
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -113,19 +115,19 @@ const bookingService = {
       });
     } catch (error) {
       console.error('Failed to notify housekeeping:', error);
+console.error('Failed to notify housekeeping:', error);
     }
   },
 
   // Search available rooms
   async searchAvailableRooms(searchCriteria) {
-    await delay(400);
-    const { checkIn, checkOut, guests, roomTypes } = searchCriteria;
-    
-    // Import room data dynamically to avoid circular imports
+    await delay(800);
     const roomsModule = await import("@/services/mockData/rooms.json");
     const rooms = roomsModule.default;
     
     // Check for conflicting bookings
+const { checkIn, checkOut } = searchCriteria;
+    
     const conflictingBookings = bookings.filter(booking => {
       if (booking.status === 'cancelled') return false;
       
@@ -136,19 +138,21 @@ const bookingService = {
       
       return (searchCheckIn < bookingCheckOut && searchCheckOut > bookingCheckIn);
     });
-    
     const occupiedRoomNumbers = conflictingBookings.map(b => b.roomNumber);
     
     // Filter available rooms
     let availableRooms = rooms.filter(room => {
-      const isNotOccupied = !occupiedRoomNumbers.includes(room.roomNumber);
+const isNotOccupied = !occupiedRoomNumbers.includes(room.roomNumber);
       const isOperational = ['Available', 'Cleaning'].includes(room.status);
-      const matchesRoomType = !roomTypes || roomTypes.length === 0 || roomTypes.includes(room.roomType);
+      const matchesRoomType = searchCriteria.roomTypes.length === 0 || 
+        searchCriteria.roomTypes.includes(room.roomType);
       
-      return isNotOccupied && isOperational && matchesRoomType;
+      // Check price range if specified
+      const matchesPriceRange = !searchCriteria.minPrice || !searchCriteria.maxPrice ||
+        (room.pricePerNight >= searchCriteria.minPrice && room.pricePerNight <= searchCriteria.maxPrice);
+      
+      return isNotOccupied && isOperational && matchesRoomType && matchesPriceRange;
     });
-    
-    // Add calculated pricing
     const nights = this.calculateNights(checkIn, checkOut);
     availableRooms = availableRooms.map(room => ({
       ...room,
@@ -280,9 +284,10 @@ const bookingService = {
       newValue: null,
       timestamp: new Date().toISOString(),
       user: 'System'
-    });
+});
     
-    return { success: true };
+    return deletedBooking;
   }
 };
+
 export default bookingService;
