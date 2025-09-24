@@ -7,6 +7,8 @@ import RoomDetailsModal from "@/components/molecules/RoomDetailsModal";
 import Loading from "@/components/ui/Loading";
 import Button from "@/components/atoms/Button";
 import Badge from "@/components/atoms/Badge";
+import Dashboard from "@/components/pages/Dashboard";
+import Maintenance from "@/components/pages/Maintenance";
 const Rooms = () => {
 const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -643,8 +645,8 @@ const filteredRooms = rooms.filter(room => {
 </button>
                       ))}
                     </div>
-                  )}
-                </div>
+)}
+                  
                   <p className="text-xs text-slate-400 mt-2">
                     Updated: {room.lastUpdated && !isNaN(new Date(room.lastUpdated))
                       ? new Date(room.lastUpdated).toLocaleTimeString()
