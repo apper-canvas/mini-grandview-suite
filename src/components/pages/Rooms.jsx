@@ -642,11 +642,10 @@ const filteredRooms = rooms.filter(room => {
                           }`}
                         >
                           {status}
-                        </button>
+</button>
                       ))}
-</div>
-)}
-</div>
+                    </div>
+                  )}
                   
                   <p className="text-xs text-slate-400 mt-2">
                     Updated: {room.lastUpdated && !isNaN(new Date(room.lastUpdated))
@@ -654,7 +653,7 @@ const filteredRooms = rooms.filter(room => {
                       : 'Unknown'
                     }
                   </p>
-            </div>
+                </div>
               ))}
           </CardContent>
         </Card>
