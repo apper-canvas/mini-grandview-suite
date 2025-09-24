@@ -231,10 +231,10 @@ const loadBookings = async () => {
 
     try {
       setLoading(true);
-      const rooms = await bookingService.searchAvailableRooms(searchCriteria);
+const rooms = await bookingService.searchAvailableRooms(searchCriteria);
       setAvailableRooms(rooms);
       if (rooms.length === 0) {
-        toast.info('No rooms available for selected dates');
+        toast.info('No rooms available for selected criteria');
       } else {
         toast.success(`Found ${rooms.length} available rooms`);
       }
