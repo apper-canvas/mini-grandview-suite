@@ -7,7 +7,6 @@ import RoomDetailsModal from "@/components/molecules/RoomDetailsModal";
 import Loading from "@/components/ui/Loading";
 import Button from "@/components/atoms/Button";
 import Badge from "@/components/atoms/Badge";
-import Badge from "@/components/atoms/Badge";
 const Rooms = () => {
 const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
