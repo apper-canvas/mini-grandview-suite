@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardHeader, CardContent } from "@/components/atoms/Card";
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader } from "@/components/atoms/Card";
+import { toast } from "react-toastify";
+import paymentService from "@/services/api/paymentService";
+import bookingService from "@/services/api/bookingService";
 import ApperIcon from "@/components/ApperIcon";
+import Loading from "@/components/ui/Loading";
 import Button from "@/components/atoms/Button";
 import Badge from "@/components/atoms/Badge";
-import { bookingService } from "@/services/api/bookingService";
-import { paymentService } from "@/services/api/paymentService";
-import { toast } from "react-toastify";
+import Dashboard from "@/components/pages/Dashboard";
+import Rooms from "@/components/pages/Rooms";
 
 const Bookings = () => {
   const [activeTab, setActiveTab] = useState('search');
