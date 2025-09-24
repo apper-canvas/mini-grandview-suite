@@ -13,7 +13,10 @@ const [rooms, setRooms] = useState([]);
   const [statusFilter, setStatusFilter] = useState('All');
   const [floorFilter, setFloorFilter] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [selectedRooms, setSelectedRooms] = useState([]);
+  const [bulkActionMode, setBulkActionMode] = useState(false);
+  const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0, room: null });
+  const [showBulkActions, setShowBulkActions] = useState(false);
   useEffect(() => {
     loadRooms();
   }, []);
@@ -42,11 +45,132 @@ const [rooms, setRooms] = useState([]);
     } catch (error) {
       toast.error('Failed to update room status');
     }
-  };
+};
 
-  const handleRoomClick = (room) => {
+  const handleRoomClick = (room, e) => {
+    if (bulkActionMode) {
+      e.preventDefault();
+      handleRoomSelection(room.Id);
+      return;
+    }
     setSelectedRoom(room);
     setIsModalOpen(true);
+  };
+
+  const handleRoomSelection = (roomId) => {
+    setSelectedRooms(prev => 
+      prev.includes(roomId) 
+        ? prev.filter(id => id !== roomId)
+        : [...prev, roomId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    const allRoomIds = filteredRooms.map(room => room.Id);
+    setSelectedRooms(prev => 
+      prev.length === allRoomIds.length ? [] : allRoomIds
+    );
+  };
+
+  const handleBulkStatusChange = async (newStatus) => {
+    if (selectedRooms.length === 0) return;
+    
+    try {
+      await roomService.bulkUpdateStatus(selectedRooms, newStatus);
+      setRooms(prev => prev.map(room => 
+        selectedRooms.includes(room.Id) 
+          ? { ...room, status: newStatus, lastUpdated: new Date().toISOString() }
+          : room
+      ));
+      toast.success(`Updated ${selectedRooms.length} rooms to ${newStatus}`);
+      setSelectedRooms([]);
+      setBulkActionMode(false);
+    } catch (error) {
+      toast.error('Failed to update rooms');
+    }
+  };
+
+  const handleBulkBlock = async (reason) => {
+    if (selectedRooms.length === 0) return;
+    
+    try {
+      await roomService.bulkBlockRooms(selectedRooms, reason);
+      setRooms(prev => prev.map(room => 
+        selectedRooms.includes(room.Id) 
+          ? { 
+              ...room, 
+              status: 'Out of Order', 
+              blocked: true, 
+              blockReason: reason,
+              lastUpdated: new Date().toISOString() 
+            }
+          : room
+      ));
+      toast.success(`Blocked ${selectedRooms.length} rooms`);
+      setSelectedRooms([]);
+    } catch (error) {
+      toast.error('Failed to block rooms');
+    }
+  };
+
+  const handleRightClick = (e, room) => {
+    e.preventDefault();
+    setContextMenu({
+      visible: true,
+      x: e.clientX,
+      y: e.clientY,
+      room: room
+    });
+  };
+
+  const handleContextAction = async (action, room) => {
+    setContextMenu({ visible: false, x: 0, y: 0, room: null });
+    
+    switch (action) {
+      case 'view':
+        setSelectedRoom(room);
+        setIsModalOpen(true);
+        break;
+      case 'block':
+        const reason = prompt('Enter reason for blocking room:');
+        if (reason) {
+          try {
+            await roomService.blockRoom(room.Id, reason);
+            setRooms(prev => prev.map(r => 
+              r.Id === room.Id 
+                ? { ...r, status: 'Out of Order', blocked: true, blockReason: reason }
+                : r
+            ));
+            toast.success(`Room ${room.roomNumber} blocked`);
+          } catch (error) {
+            toast.error('Failed to block room');
+          }
+        }
+        break;
+      case 'unblock':
+        try {
+          await roomService.unblockRoom(room.Id);
+          setRooms(prev => prev.map(r => 
+            r.Id === room.Id 
+              ? { ...r, status: 'Available', blocked: false, blockReason: null }
+              : r
+          ));
+          toast.success(`Room ${room.roomNumber} unblocked`);
+        } catch (error) {
+          toast.error('Failed to unblock room');
+        }
+        break;
+      case 'maintenance':
+        await handleStatusChange(room.Id, 'Maintenance');
+        break;
+      case 'cleaning':
+        await handleStatusChange(room.Id, 'Cleaning');
+        break;
+    }
+  };
+
+  const closeContextMenu = () => {
+    setContextMenu({ visible: false, x: 0, y: 0, room: null });
   };
 
   const getStatusBadgeVariant = (status) => {
@@ -118,9 +242,10 @@ const [rooms, setRooms] = useState([]);
 
       {/* Placeholder Content */}
 {/* Filter Bar */}
+{/* Filters and Bulk Actions */}
       <Card className="mb-6">
         <CardContent className="py-4">
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4 mb-4">
             <div className="flex items-center gap-2">
               <ApperIcon name="Filter" className="h-4 w-4 text-secondary" />
               <span className="text-sm font-medium text-slate-700">Filters:</span>
@@ -139,6 +264,7 @@ const [rooms, setRooms] = useState([]);
                 <option value="Occupied">Occupied</option>
                 <option value="Maintenance">Maintenance</option>
                 <option value="Cleaning">Cleaning</option>
+                <option value="Out of Order">Out of Order</option>
               </select>
             </div>
 
@@ -157,11 +283,85 @@ const [rooms, setRooms] = useState([]);
               </select>
             </div>
 
+            {/* Bulk Action Toggle */}
+            <Button
+              variant={bulkActionMode ? "default" : "outline"}
+              size="sm"
+              onClick={() => {
+                setBulkActionMode(!bulkActionMode);
+                setSelectedRooms([]);
+              }}
+              className="ml-auto"
+            >
+              <ApperIcon name="CheckSquare" className="h-4 w-4 mr-2" />
+              {bulkActionMode ? 'Exit Bulk Mode' : 'Bulk Select'}
+            </Button>
+
             {/* Results Count */}
-            <div className="ml-auto text-sm text-secondary">
+            <div className="text-sm text-secondary">
               Showing {filteredRooms.length} of {rooms.length} rooms
             </div>
           </div>
+
+          {/* Bulk Actions Bar */}
+          {bulkActionMode && (
+            <div className="border-t pt-4">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedRooms.length === filteredRooms.length && filteredRooms.length > 0}
+                    onChange={handleSelectAll}
+                    className="h-4 w-4 text-primary"
+                  />
+                  <span className="text-sm font-medium">
+                    {selectedRooms.length} of {filteredRooms.length} selected
+                  </span>
+                </div>
+
+                {selectedRooms.length > 0 && (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleBulkStatusChange('Available')}
+                    >
+                      <ApperIcon name="Check" className="h-3 w-3 mr-1" />
+                      Available
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleBulkStatusChange('Maintenance')}
+                    >
+                      <ApperIcon name="Wrench" className="h-3 w-3 mr-1" />
+                      Maintenance
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleBulkStatusChange('Cleaning')}
+                    >
+                      <ApperIcon name="Sparkles" className="h-3 w-3 mr-1" />
+                      Cleaning
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const reason = prompt('Enter reason for blocking rooms:');
+                        if (reason) handleBulkBlock(reason);
+                      }}
+                      className="text-error hover:text-error"
+                    >
+                      <ApperIcon name="Ban" className="h-3 w-3 mr-1" />
+                      Block
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -179,16 +379,37 @@ const [rooms, setRooms] = useState([]);
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {groupedByFloor[floor].map(room => (
+{groupedByFloor[floor].map(room => (
                 <div 
                   key={room.Id}
-                  onClick={() => handleRoomClick(room)}
-                  className="p-4 border border-slate-200 rounded-lg cursor-pointer hover:shadow-md hover:border-primary/30 transition-all duration-200 bg-white"
+                  onClick={(e) => handleRoomClick(room, e)}
+                  onContextMenu={(e) => handleRightClick(e, room)}
+                  className={`p-4 border rounded-lg cursor-pointer hover:shadow-md transition-all duration-200 bg-white relative ${
+                    selectedRooms.includes(room.Id) 
+                      ? 'border-primary bg-primary/5' 
+                      : room.blocked 
+                        ? 'border-error/50 bg-error/5' 
+                        : 'border-slate-200 hover:border-primary/30'
+                  }`}
                 >
-                  <div className="flex items-center justify-between mb-2">
+                  {bulkActionMode && (
+                    <div className="absolute top-2 left-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedRooms.includes(room.Id)}
+                        onChange={() => handleRoomSelection(room.Id)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="h-4 w-4 text-primary"
+                      />
+                    </div>
+                  )}
+<div className={`flex items-center justify-between mb-2 ${bulkActionMode ? 'ml-6' : ''}`}>
                     <div className="flex items-center gap-2">
                       <ApperIcon name="Bed" className="h-4 w-4 text-slate-600" />
                       <span className="font-semibold text-slate-900">{room.roomNumber}</span>
+                      {room.blocked && (
+                        <ApperIcon name="Ban" className="h-4 w-4 text-error" title="Room Blocked" />
+                      )}
                     </div>
                     <Badge variant={getStatusBadgeVariant(room.status)}>
                       <ApperIcon name={getStatusIcon(room.status)} className="h-3 w-3 mr-1" />
@@ -196,7 +417,7 @@ const [rooms, setRooms] = useState([]);
                     </Badge>
                   </div>
                   
-                  <div className="space-y-1 mb-3">
+<div className={`space-y-1 mb-3 ${bulkActionMode ? 'ml-6' : ''}`}>
                     <p className="text-sm text-slate-600">{room.roomType}</p>
                     <p className="text-sm font-medium text-slate-900">${room.nightlyRate}/night</p>
                     {room.status === 'Occupied' && room.guestName && (
@@ -205,26 +426,38 @@ const [rooms, setRooms] = useState([]);
                         <p className="text-xs text-slate-500">Check-out: {room.checkoutTime}</p>
                       </>
                     )}
+                    {room.blocked && room.blockReason && (
+                      <p className="text-xs text-error">Blocked: {room.blockReason}</p>
+                    )}
+                    {room.notes && room.notes.length > 0 && (
+                      <div className="flex items-center gap-1">
+                        <ApperIcon name="MessageSquare" className="h-3 w-3 text-secondary" />
+                        <p className="text-xs text-secondary">{room.notes.length} note(s)</p>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="flex gap-1">
-                    {['Available', 'Occupied', 'Maintenance', 'Cleaning'].map(status => (
-                      <button
-                        key={status}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleStatusChange(room.Id, status);
-                        }}
-                        className={`px-2 py-1 text-xs rounded transition-colors duration-200 ${
-                          room.status === status 
-                            ? 'bg-primary text-white' 
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        }`}
-                      >
-                        {status}
-                      </button>
-                    ))}
-                  </div>
+{!bulkActionMode && (
+                    <div className="flex gap-1 flex-wrap">
+                      {['Available', 'Occupied', 'Maintenance', 'Cleaning'].map(status => (
+                        <button
+                          key={status}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStatusChange(room.Id, status);
+                          }}
+                          disabled={room.blocked && status !== 'Available'}
+                          className={`px-2 py-1 text-xs rounded transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                            room.status === status 
+                              ? 'bg-primary text-white' 
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          {status}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   
                   <p className="text-xs text-slate-400 mt-2">
                     Updated: {new Date(room.lastUpdated).toLocaleTimeString()}
@@ -250,13 +483,72 @@ const [rooms, setRooms] = useState([]);
         </Card>
       )}
 
-      {/* Room Details Modal */}
+{/* Room Details Modal */}
       <RoomDetailsModal 
         room={selectedRoom}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onStatusChange={handleStatusChange}
+        onRoomUpdate={loadRooms}
       />
+
+      {/* Context Menu */}
+      {contextMenu.visible && (
+        <>
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={closeContextMenu}
+          />
+          <div 
+            className="fixed bg-white border border-slate-200 rounded-lg shadow-lg py-2 z-50 min-w-48"
+            style={{ left: contextMenu.x, top: contextMenu.y }}
+          >
+            <button
+              className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center gap-2"
+              onClick={() => handleContextAction('view', contextMenu.room)}
+            >
+              <ApperIcon name="Eye" className="h-4 w-4" />
+              View Details
+            </button>
+            
+            {!contextMenu.room?.blocked ? (
+              <button
+                className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center gap-2 text-error"
+                onClick={() => handleContextAction('block', contextMenu.room)}
+              >
+                <ApperIcon name="Ban" className="h-4 w-4" />
+                Block Room
+              </button>
+            ) : (
+              <button
+                className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center gap-2 text-success"
+                onClick={() => handleContextAction('unblock', contextMenu.room)}
+              >
+                <ApperIcon name="CheckCircle" className="h-4 w-4" />
+                Unblock Room
+              </button>
+            )}
+
+            <div className="border-t my-1" />
+            
+            <button
+              className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center gap-2"
+              onClick={() => handleContextAction('maintenance', contextMenu.room)}
+            >
+              <ApperIcon name="Wrench" className="h-4 w-4" />
+              Set Maintenance
+            </button>
+            
+            <button
+              className="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center gap-2"
+              onClick={() => handleContextAction('cleaning', contextMenu.room)}
+            >
+              <ApperIcon name="Sparkles" className="h-4 w-4" />
+              Set Cleaning
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

@@ -1,5 +1,4 @@
-import mockRooms from '@/services/mockData/rooms.json';
-import { toast } from 'react-toastify';
+import mockRooms from "@/services/mockData/rooms.json";
 
 class RoomService {
   constructor() {
@@ -186,7 +185,183 @@ class RoomService {
       ]
     };
 
+return { ...this.rooms[roomIndex] };
+  }
+
+  async bulkUpdateStatus(roomIds, newStatus) {
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    roomIds.forEach(roomId => {
+      const roomIndex = this.rooms.findIndex(r => r.Id === parseInt(roomId));
+      if (roomIndex !== -1) {
+        const room = this.rooms[roomIndex];
+        const oldStatus = room.status;
+        
+        this.rooms[roomIndex] = {
+          ...room,
+          status: newStatus,
+          lastUpdated: new Date().toISOString(),
+          statusHistory: [
+            ...room.statusHistory,
+            {
+              status: newStatus,
+              timestamp: new Date().toISOString(),
+              changedFrom: oldStatus,
+              changedBy: 'Current User',
+              note: `Bulk status change`
+            }
+          ]
+        };
+
+        // Clear guest info if room becomes available
+        if (newStatus === 'Available') {
+          this.rooms[roomIndex].guestName = null;
+          this.rooms[roomIndex].checkoutTime = null;
+          this.rooms[roomIndex].checkinTime = null;
+        }
+      }
+    });
+
+    return this.rooms.filter(room => roomIds.includes(room.Id.toString()));
+  }
+
+  async bulkBlockRooms(roomIds, reason) {
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
+    roomIds.forEach(roomId => {
+      const roomIndex = this.rooms.findIndex(r => r.Id === parseInt(roomId));
+      if (roomIndex !== -1) {
+        const room = this.rooms[roomIndex];
+        
+        this.rooms[roomIndex] = {
+          ...room,
+          status: 'Out of Order',
+          blocked: true,
+          blockReason: reason,
+          lastUpdated: new Date().toISOString(),
+          statusHistory: [
+            ...room.statusHistory,
+            {
+              status: 'Out of Order',
+              timestamp: new Date().toISOString(),
+              changedFrom: room.status,
+              changedBy: 'Current User',
+              note: `Room blocked - ${reason}`
+            }
+          ]
+        };
+      }
+    });
+
+    return this.rooms.filter(room => roomIds.includes(room.Id.toString()));
+  }
+
+  async blockRoom(roomId, reason) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const roomIndex = this.rooms.findIndex(r => r.Id === parseInt(roomId));
+    if (roomIndex === -1) {
+      throw new Error(`Room with ID ${roomId} not found`);
+    }
+
+    const room = this.rooms[roomIndex];
+    
+    this.rooms[roomIndex] = {
+      ...room,
+      status: 'Out of Order',
+      blocked: true,
+      blockReason: reason,
+      lastUpdated: new Date().toISOString(),
+      statusHistory: [
+        ...room.statusHistory,
+        {
+          status: 'Out of Order',
+          timestamp: new Date().toISOString(),
+          changedFrom: room.status,
+          changedBy: 'Current User',
+          note: `Room blocked - ${reason}`
+        }
+      ]
+    };
+
     return { ...this.rooms[roomIndex] };
+  }
+
+  async unblockRoom(roomId) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const roomIndex = this.rooms.findIndex(r => r.Id === parseInt(roomId));
+    if (roomIndex === -1) {
+      throw new Error(`Room with ID ${roomId} not found`);
+    }
+
+    const room = this.rooms[roomIndex];
+    
+    this.rooms[roomIndex] = {
+      ...room,
+      status: 'Available',
+      blocked: false,
+      blockReason: null,
+      lastUpdated: new Date().toISOString(),
+      statusHistory: [
+        ...room.statusHistory,
+        {
+          status: 'Available',
+          timestamp: new Date().toISOString(),
+          changedFrom: room.status,
+          changedBy: 'Current User',
+          note: 'Room unblocked and made available'
+        }
+      ]
+    };
+
+    return { ...this.rooms[roomIndex] };
+  }
+
+  async addNote(roomId, noteContent) {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    
+    const roomIndex = this.rooms.findIndex(r => r.Id === parseInt(roomId));
+    if (roomIndex === -1) {
+      throw new Error(`Room with ID ${roomId} not found`);
+    }
+
+    const room = this.rooms[roomIndex];
+    const newNote = {
+      id: Date.now(),
+      content: noteContent,
+      timestamp: new Date().toISOString(),
+      addedBy: 'Current User',
+      type: 'General'
+    };
+
+    this.rooms[roomIndex] = {
+      ...room,
+      notes: [...(room.notes || []), newNote],
+      lastUpdated: new Date().toISOString()
+    };
+
+    return { ...this.rooms[roomIndex] };
+  }
+
+  async deleteNote(roomId, noteId) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    const roomIndex = this.rooms.findIndex(r => r.Id === parseInt(roomId));
+    if (roomIndex === -1) {
+      throw new Error(`Room with ID ${roomId} not found`);
+    }
+
+    const room = this.rooms[roomIndex];
+    
+    this.rooms[roomIndex] = {
+      ...room,
+      notes: (room.notes || []).filter(note => note.id !== noteId),
+      lastUpdated: new Date().toISOString()
+    };
+
+    return { ...this.rooms[roomIndex] };
+return { ...this.rooms[roomIndex] };
   }
 }
 

@@ -1,14 +1,16 @@
 import React, { useState } from "react";
-import { Card, CardHeader, CardContent } from "@/components/atoms/Card";
-import Badge from "@/components/atoms/Badge";
-import Button from "@/components/atoms/Button";
-import ApperIcon from "@/components/ApperIcon";
+import { Card, CardContent, CardHeader } from "@/components/atoms/Card";
 import { roomService } from "@/services/api/roomService";
 import { toast } from "react-toastify";
+import ApperIcon from "@/components/ApperIcon";
+import Button from "@/components/atoms/Button";
+import Badge from "@/components/atoms/Badge";
 
-const RoomDetailsModal = ({ room, isOpen, onClose, onStatusChange }) => {
-  const [isUpdating, setIsUpdating] = useState(false);
+const RoomDetailsModal = ({ room, isOpen, onClose, onStatusChange, onRoomUpdate }) => {
+const [isUpdating, setIsUpdating] = useState(false);
   const [showGuestForm, setShowGuestForm] = useState(false);
+  const [showNotesForm, setShowNotesForm] = useState(false);
+  const [newNote, setNewNote] = useState('');
   const [guestData, setGuestData] = useState({
     guestName: '',
     checkoutTime: ''
@@ -67,6 +69,57 @@ const RoomDetailsModal = ({ room, isOpen, onClose, onStatusChange }) => {
       toast.success(`Guest checked out from room ${room.roomNumber}`);
     } catch (error) {
       toast.error('Failed to check out guest');
+    } finally {
+      setIsUpdating(false);
+    }
+};
+
+  const handleAddNote = async () => {
+    if (!newNote.trim()) {
+      toast.error('Please enter a note');
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      await roomService.addNote(room.Id, newNote);
+      setNewNote('');
+      setShowNotesForm(false);
+      toast.success('Note added successfully');
+      onRoomUpdate && onRoomUpdate();
+    } catch (error) {
+      toast.error('Failed to add note');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleBlockRoom = async () => {
+    const reason = prompt('Enter reason for blocking room:');
+    if (!reason) return;
+
+    setIsUpdating(true);
+    try {
+      await roomService.blockRoom(room.Id, reason);
+      await onStatusChange(room.Id, 'Out of Order');
+      toast.success(`Room ${room.roomNumber} blocked`);
+    } catch (error) {
+      toast.error('Failed to block room');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleUnblockRoom = async () => {
+    if (!confirm(`Unblock room ${room.roomNumber}?`)) return;
+
+    setIsUpdating(true);
+    try {
+      await roomService.unblockRoom(room.Id);
+      await onStatusChange(room.Id, 'Available');
+      toast.success(`Room ${room.roomNumber} unblocked`);
+    } catch (error) {
+      toast.error('Failed to unblock room');
     } finally {
       setIsUpdating(false);
     }
@@ -265,7 +318,85 @@ const RoomDetailsModal = ({ room, isOpen, onClose, onStatusChange }) => {
                   <ApperIcon name="LogOut" className="h-4 w-4" />
                   Check Out Guest
                 </Button>
-              )}
+)}
+
+              {/* Room Blocking Controls */}
+              <div className="border rounded-lg p-4 bg-slate-50 mt-4">
+                <h4 className="font-medium text-slate-900 mb-3">Room Management</h4>
+                <div className="flex gap-2">
+                  {!room.blocked ? (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleBlockRoom}
+                      disabled={isUpdating}
+                      className="text-error hover:text-error"
+                    >
+                      <ApperIcon name="Ban" className="h-4 w-4 mr-2" />
+                      Block Room
+                    </Button>
+                  ) : (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleUnblockRoom}
+                      disabled={isUpdating}
+                      className="text-success hover:text-success"
+                    >
+                      <ApperIcon name="CheckCircle" className="h-4 w-4 mr-2" />
+                      Unblock Room
+                    </Button>
+                  )}
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setShowNotesForm(!showNotesForm)}
+                  >
+                    <ApperIcon name="MessageSquare" className="h-4 w-4 mr-2" />
+                    {showNotesForm ? 'Cancel Note' : 'Add Note'}
+                  </Button>
+                </div>
+
+                {room.blocked && room.blockReason && (
+                  <div className="mt-3 p-2 bg-error/10 border border-error/20 rounded">
+                    <p className="text-sm font-medium text-error">Blocked</p>
+                    <p className="text-sm text-error/80">Reason: {room.blockReason}</p>
+                  </div>
+                )}
+
+                {/* Add Note Form */}
+                {showNotesForm && (
+                  <div className="mt-3 space-y-2">
+                    <textarea
+                      value={newNote}
+                      onChange={(e) => setNewNote(e.target.value)}
+                      placeholder="Enter maintenance or housekeeping note..."
+                      rows="3"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        onClick={handleAddNote}
+                        disabled={isUpdating || !newNote.trim()}
+                      >
+                        Add Note
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => {
+                          setShowNotesForm(false);
+                          setNewNote('');
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Status History */}
@@ -302,6 +433,33 @@ const RoomDetailsModal = ({ room, isOpen, onClose, onStatusChange }) => {
                 ) : (
                   <div className="p-4 text-center text-sm text-secondary">
                     No status history available
+                  </div>
+                )}
+              </div>
+</div>
+
+            {/* Notes Section */}
+            <div>
+              <h3 className="font-semibold text-slate-900 mb-3">Notes & Comments</h3>
+              <div className="max-h-48 overflow-y-auto border rounded-lg">
+                {room.notes && room.notes.length > 0 ? (
+                  <div className="divide-y divide-slate-200">
+                    {room.notes.slice(-10).reverse().map((note, index) => (
+                      <div key={index} className="p-3 hover:bg-slate-50">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium text-slate-900">{note.type || 'General'}</span>
+                          <span className="text-xs text-secondary">
+                            {new Date(note.timestamp).toLocaleString()}
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-600">{note.content}</p>
+                        <p className="text-xs text-slate-400 mt-1">By: {note.addedBy}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-sm text-secondary">
+                    No notes available
                   </div>
                 )}
               </div>

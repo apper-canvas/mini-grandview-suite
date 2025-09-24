@@ -4,12 +4,15 @@
     "roomNumber": "101",
     "floor": 1,
     "roomType": "Standard Queen",
-    "status": "Available",
+"status": "Available",
     "nightlyRate": 129,
     "guestName": null,
     "checkinTime": null,
     "checkoutTime": null,
+    "blocked": false,
+    "blockReason": null,
     "lastUpdated": "2024-01-15T08:00:00Z",
+    "notes": [],
     "statusHistory": [
       {
         "status": "Available",
@@ -24,12 +27,23 @@
     "roomNumber": "102",
     "floor": 1,
     "roomType": "Standard King",
-    "status": "Occupied",
+"status": "Occupied",
     "nightlyRate": 149,
     "guestName": "John Smith",
     "checkinTime": "2024-01-14T15:00:00Z",
     "checkoutTime": "2024-01-16T11:00:00Z",
+    "blocked": false,
+    "blockReason": null,
     "lastUpdated": "2024-01-14T15:00:00Z",
+    "notes": [
+      {
+        "id": 1001,
+        "content": "Guest requested extra towels",
+        "timestamp": "2024-01-14T16:30:00Z",
+        "addedBy": "Housekeeping Staff",
+        "type": "Housekeeping"
+      }
+    ],
     "statusHistory": [
       {
         "status": "Occupied",
@@ -45,12 +59,30 @@
     "roomNumber": "103",
     "floor": 1,
     "roomType": "Deluxe Queen",
-    "status": "Maintenance",
+"status": "Maintenance",
     "nightlyRate": 169,
     "guestName": null,
     "checkinTime": null,
     "checkoutTime": null,
+    "blocked": false,
+    "blockReason": null,
     "lastUpdated": "2024-01-15T06:30:00Z",
+    "notes": [
+      {
+        "id": 1002,
+        "content": "AC unit repair required - technician scheduled for 2pm",
+        "timestamp": "2024-01-15T06:30:00Z",
+        "addedBy": "Maintenance Staff",
+        "type": "Maintenance"
+      },
+      {
+        "id": 1003,
+        "content": "Parts ordered, estimated completion tomorrow",
+        "timestamp": "2024-01-15T10:00:00Z",
+        "addedBy": "Maintenance Manager",
+        "type": "Maintenance"
+      }
+    ],
     "statusHistory": [
       {
         "status": "Maintenance",
