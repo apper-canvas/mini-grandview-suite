@@ -645,7 +645,7 @@ const filteredRooms = rooms.filter(room => {
                         </button>
                       ))}
 </div>
-                  )}
+)}
                 </div>
               ))}
                   
@@ -655,7 +655,6 @@ const filteredRooms = rooms.filter(room => {
                       : 'Unknown'
                     }
                   </p>
-              ))}
             </div>
           </CardContent>
         </Card>
