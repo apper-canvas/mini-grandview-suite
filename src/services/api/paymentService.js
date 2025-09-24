@@ -38,7 +38,7 @@ const paymentService = {
     return { ...newPayment };
   },
 
-  // Process payment
+// Process payment
   async processPayment(paymentData) {
     await delay(800); // Simulate payment processing time
     

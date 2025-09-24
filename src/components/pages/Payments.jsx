@@ -74,7 +74,7 @@ const Payments = () => {
   };
 
   const getStatusBadgeVariant = (status) => {
-    switch (status) {
+switch (status) {
       case 'completed': return 'success';
       case 'pending': return 'warning';
       case 'failed': return 'error';
@@ -82,10 +82,11 @@ const Payments = () => {
     }
   };
 
-  const getPaymentMethodIcon = (method) => {
+const getPaymentMethodIcon = (method) => {
     switch (method) {
       case 'card': return 'CreditCard';
       case 'cash': return 'Banknote';
+      case 'upi': return 'Smartphone';
       default: return 'DollarSign';
     }
   };

@@ -232,25 +232,24 @@ const loadBookings = async () => {
         roomNumber: selectedRoom.roomNumber,
         checkIn: searchCriteria.checkIn,
         checkOut: searchCriteria.checkOut,
-        totalAmount: selectedRoom.total,
-        paidAmount: selectedRoom.total,
+totalAmount: selectedRoom.total,
+        paidAmount: 0,
         specialRequests: bookingForm.specialRequests
       };
 
       const newBooking = await bookingService.create(bookingData);
       
-      // Process payment
+// Create pending payment record
       const paymentData = {
         bookingId: newBooking.Id,
         guestName: bookingForm.guestName,
         roomNumber: selectedRoom.roomNumber,
         amount: selectedRoom.total,
         paymentMethod: bookingForm.paymentMethod,
-        cardBrand: 'Visa',
-        cardLastFour: '4242'
+        status: 'pending'
       };
 
-      await paymentService.processPayment(paymentData);
+      await paymentService.createPendingPayment(paymentData);
 
       toast.success('Booking confirmed successfully!');
       
@@ -294,8 +293,8 @@ const formatDate = (dateString) => {
   };
 
   const getStatusBadgeVariant = (status) => {
-    switch (status) {
-      case 'confirmed': return 'available';
+switch (status) {
+      case 'confirmed': return 'success';
       case 'pending_payment': return 'warning';
       case 'cancelled': return 'maintenance';
       default: return 'default';
@@ -881,14 +880,14 @@ const formatDate = (dateString) => {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Payment Method</label>
-                  <select
+<select
                     value={bookingForm.paymentMethod}
                     onChange={(e) => setBookingForm(prev => ({ ...prev, paymentMethod: e.target.value }))}
                     className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
                   >
-                    <option value="card">Credit Card</option>
                     <option value="cash">Cash</option>
-                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="card">Credit Card</option>
+                    <option value="upi">UPI</option>
                   </select>
                 </div>
 

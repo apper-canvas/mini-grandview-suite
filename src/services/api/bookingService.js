@@ -210,8 +210,8 @@ const bookingService = {
     
     const newBooking = {
       ...bookingData,
-      Id: Math.max(...bookings.map(b => b.Id), 0) + 1,
-      status: 'confirmed',
+Id: Math.max(...bookings.map(b => b.Id), 0) + 1,
+      status: 'pending_payment',
       createdAt: new Date().toISOString()
     };
     
