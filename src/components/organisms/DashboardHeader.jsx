@@ -14,9 +14,12 @@ const DashboardHeader = ({ lastUpdated, isRefreshing }) => {
             Hotel Dashboard
           </h1>
           <div className="flex items-center space-x-2 mt-2">
-            <ApperIcon name="Calendar" size={16} className="text-secondary" />
+<ApperIcon name="Calendar" size={16} className="text-secondary" />
             <span className="text-secondary">
-              {format(currentDate, "EEEE, MMMM dd, yyyy")}
+              {currentDate && !isNaN(currentDate)
+                ? format(currentDate, "EEEE, MMMM dd, yyyy")
+                : format(new Date(), "EEEE, MMMM dd, yyyy")
+              }
             </span>
           </div>
         </div>

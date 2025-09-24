@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardHeader, CardContent } from "@/components/atoms/Card";
-import ApperIcon from "@/components/ApperIcon";
-import Badge from "@/components/atoms/Badge";
-import Button from "@/components/atoms/Button";
-import RoomDetailsModal from "@/components/molecules/RoomDetailsModal";
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader } from "@/components/atoms/Card";
 import { roomService } from "@/services/api/roomService";
 import { toast } from "react-toastify";
+import ApperIcon from "@/components/ApperIcon";
+import RoomDetailsModal from "@/components/molecules/RoomDetailsModal";
+import Loading from "@/components/ui/Loading";
+import Button from "@/components/atoms/Button";
+import Badge from "@/components/atoms/Badge";
+import Dashboard from "@/components/pages/Dashboard";
+import Maintenance from "@/components/pages/Maintenance";
 const Rooms = () => {
 const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -643,11 +646,14 @@ const filteredRooms = rooms.filter(room => {
                       ))}
                     </div>
                   )}
+)}
                   
                   <p className="text-xs text-slate-400 mt-2">
-                    Updated: {new Date(room.lastUpdated).toLocaleTimeString()}
+                    Updated: {room.lastUpdated && !isNaN(new Date(room.lastUpdated))
+                      ? new Date(room.lastUpdated).toLocaleTimeString()
+                      : 'Unknown'
+                    }
                   </p>
-                </div>
               ))}
             </div>
           </CardContent>

@@ -416,9 +416,12 @@ const WorkOrderDetailsModal = ({ workOrder, isOpen, onClose, onUpdate }) => {
               <div className="space-y-2">
                 {workOrder.notes.map((note) => (
                   <div key={note.Id} className="bg-slate-50 p-3 rounded">
-                    <p className="text-sm">{note.note}</p>
+<p className="text-sm">{note.note}</p>
                     <p className="text-xs text-secondary mt-1">
-                      {note.addedBy} - {new Date(note.addedAt).toLocaleDateString()}
+                      {note.addedBy} - {note.addedAt && !isNaN(new Date(note.addedAt))
+                        ? new Date(note.addedAt).toLocaleDateString()
+                        : 'Unknown date'
+                      }
                     </p>
                   </div>
                 ))}

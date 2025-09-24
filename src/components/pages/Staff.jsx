@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardHeader, CardContent } from "@/components/atoms/Card";
-import Button from "@/components/atoms/Button";
-import Badge from "@/components/atoms/Badge";
-import ApperIcon from "@/components/ApperIcon";
-import Loading from "@/components/ui/Loading";
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader } from "@/components/atoms/Card";
 import { staffService } from "@/services/api/staffService";
 import { toast } from "react-toastify";
+import ApperIcon from "@/components/ApperIcon";
+import Loading from "@/components/ui/Loading";
+import Button from "@/components/atoms/Button";
+import Badge from "@/components/atoms/Badge";
+import Dashboard from "@/components/pages/Dashboard";
 
 const Staff = () => {
   const [activeTab, setActiveTab] = useState('schedule');

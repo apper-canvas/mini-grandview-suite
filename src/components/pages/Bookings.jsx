@@ -289,7 +289,9 @@ totalAmount: selectedRoom.total,
   };
 
 const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString();
+    if (!dateString) return 'Invalid Date';
+    const date = new Date(dateString);
+    return !isNaN(date) ? date.toLocaleDateString() : 'Invalid Date';
   };
 
   const getStatusBadgeVariant = (status) => {
@@ -822,11 +824,11 @@ switch (status) {
               {/* Room Summary */}
               <div className="bg-slate-50 p-4 rounded-lg mb-6">
                 <h4 className="font-medium text-slate-900 mb-2">Room {selectedRoom.roomNumber}</h4>
+<h4 className="font-medium text-slate-900 mb-2">Room {selectedRoom.roomNumber}</h4>
                 <p className="text-sm text-slate-600 mb-2">{selectedRoom.roomType}</p>
                 <p className="text-sm text-slate-600 mb-2">
                   {formatDate(searchCriteria.checkIn)} - {formatDate(searchCriteria.checkOut)}
                 </p>
-                <p className="text-lg font-semibold text-slate-900">Total: ${selectedRoom.total}</p>
               </div>
 
               {/* Booking Form */}

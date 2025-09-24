@@ -69,8 +69,10 @@ const Payments = () => {
     setShowInvoiceModal(true);
   };
 
-  const formatDate = (dateString) => {
-    return format(new Date(dateString), 'MMM dd, yyyy HH:mm');
+const formatDate = (dateString) => {
+    if (!dateString) return 'Invalid Date';
+    const date = new Date(dateString);
+    return !isNaN(date) ? format(date, 'MMM dd, yyyy HH:mm') : 'Invalid Date';
   };
 
   const getStatusBadgeVariant = (status) => {

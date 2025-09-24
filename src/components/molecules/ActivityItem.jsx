@@ -61,7 +61,10 @@ const ActivityItem = ({ activity }) => {
           )}
         </div>
         <p className="text-xs text-secondary mt-1">
-          {format(new Date(activity.timestamp), "MMM dd, yyyy 'at' h:mm a")}
+{activity.timestamp 
+            ? format(new Date(activity.timestamp), "MMM dd, yyyy 'at' h:mm a")
+            : 'Just now'
+          }
         </p>
       </div>
     </div>

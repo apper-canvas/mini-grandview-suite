@@ -333,9 +333,14 @@ const CleaningBoard = ({ tasks, onDragStart, onDragOver, onDrop, onStatusUpdate,
                     <span>Est: {formatTime(task.estimatedTime)}</span>
                   </div>
                   {task.startTime && (
-                    <div className="flex items-center gap-1">
+<div className="flex items-center gap-1">
                       <ApperIcon name="Play" className="h-3 w-3" />
-                      <span>{new Date(task.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                      <span>
+                        {task.startTime && !isNaN(new Date(task.startTime))
+                          ? new Date(task.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                          : '--:--'
+                        }
+                      </span>
                     </div>
                   )}
                 </div>
