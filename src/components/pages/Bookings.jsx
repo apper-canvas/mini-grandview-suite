@@ -265,9 +265,8 @@ const loadBookings = async () => {
       const bookingData = {
         guestName: bookingForm.guestName,
         email: bookingForm.email,
-        phone: bookingForm.phone,
+phone: bookingForm.phone,
         roomNumber: selectedRoom.roomNumber,
-roomNumber: selectedRoom.roomNumber,
         checkIn: searchCriteria.checkIn,
         checkOut: searchCriteria.checkOut,
         totalAmount: selectedRoom.total,
@@ -288,7 +287,7 @@ roomNumber: selectedRoom.roomNumber,
         cardBrand: 'Visa',
         cardLastFour: '4242'
       };
-await paymentService.processPayment(paymentData);
+      await paymentService.processPayment(paymentData);
 
       toast.success('Booking created successfully!');
       
@@ -303,6 +302,7 @@ await paymentService.processPayment(paymentData);
 
       // Reset form
       setSelectedRoom(null);
+      setBookingForm({
         guestName: '',
         email: '',
         phone: '',
