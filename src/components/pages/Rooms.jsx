@@ -278,21 +278,19 @@ const handleRightClick = (e, room) => {
   };
 
 const filteredRooms = rooms.filter(room => {
-    const matchesStatus = statusFilter === 'All' || room.status === statusFilter;
-    const matchesFloor = floorFilter === 'All' || room.floor.toString() === floorFilter;
+    const matchesStatus = statusFilter === 'All' || room.status_c === statusFilter;
+    const matchesFloor = floorFilter === 'All' || room.floor_c.toString() === floorFilter;
     
     // Search functionality
     const matchesSearch = !searchQuery || 
-      room.roomNumber.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (room.guestName && room.guestName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (room.bookingId && room.bookingId.toString().toLowerCase().includes(searchQuery.toLowerCase()));
-    
+      room.room_number_c.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (room.guest_name_c && room.guest_name_c.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesStatus && matchesFloor && matchesSearch;
   });
 
-  const groupedByFloor = filteredRooms.reduce((acc, room) => {
-    if (!acc[room.floor]) acc[room.floor] = [];
-    acc[room.floor].push(room);
+const groupedByFloor = filteredRooms.reduce((acc, room) => {
+    if (!acc[room.floor_c]) acc[room.floor_c] = [];
+    acc[room.floor_c].push(room);
     return acc;
   }, {});
 

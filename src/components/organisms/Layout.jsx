@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import Sidebar from "./Sidebar";
-import ApperIcon from "@/components/ApperIcon";
-import Button from "@/components/atoms/Button";
+import React, { useState } from 'react'
+import Sidebar from './Sidebar'
+import ApperIcon from '@/components/ApperIcon'
+import Button from '@/components/atoms/Button'
+import LogoutButton from '@/components/atoms/LogoutButton'
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -33,9 +34,10 @@ const Layout = ({ children }) => {
             </div>
           </div>
           
-          <Button variant="ghost" size="sm" className="p-2">
+<Button variant="ghost" size="sm" className="p-2">
             <ApperIcon name="Bell" className="h-5 w-5" />
           </Button>
+          <LogoutButton />
         </div>
       </div>
 
