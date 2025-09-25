@@ -1,0 +1,102 @@
+[
+  {
+    "Id": 1,
+    "type": "maintenance",
+    "title": "Urgent Maintenance Required",
+    "message": "Heating system in East Wing requires immediate attention",
+    "priority": "high",
+    "timestamp": "2024-01-15T15:30:00Z",
+    "read": false,
+    "category": "maintenance"
+  },
+  {
+    "Id": 2,
+    "type": "booking",
+    "title": "Large Group Check-in Today",
+    "message": "Corporate group of 45 guests checking in at 3:00 PM",
+    "priority": "medium",
+    "timestamp": "2024-01-15T14:00:00Z",
+    "read": false,
+    "category": "operations"
+  },
+  {
+    "Id": 3,
+    "type": "guest",
+    "title": "VIP Guest Arrival",
+    "message": "Premium suite guest arriving with special dietary requirements",
+    "priority": "high",
+    "timestamp": "2024-01-15T13:15:00Z",
+    "read": true,
+    "category": "guest-services"
+  },
+  {
+    "Id": 4,
+    "type": "system",
+    "title": "System Backup Completed",
+    "message": "Daily system backup completed successfully at 2:00 AM",
+    "priority": "low",
+    "timestamp": "2024-01-15T02:00:00Z",
+    "read": true,
+    "category": "system"
+  },
+  {
+    "Id": 5,
+    "type": "staff",
+    "title": "Staff Schedule Update",
+    "message": "Additional housekeeping staff scheduled for weekend",
+    "priority": "medium",
+    "timestamp": "2024-01-15T11:30:00Z",
+    "read": false,
+    "category": "staff"
+  },
+  {
+    "Id": 6,
+    "type": "financial",
+    "title": "Revenue Target Exceeded",
+    "message": "Monthly revenue target exceeded by 12% - congratulations team!",
+    "priority": "low",
+    "timestamp": "2024-01-15T10:00:00Z",
+    "read": true,
+    "category": "financial"
+  },
+  {
+    "Id": 7,
+    "type": "maintenance",
+    "title": "Pool Area Maintenance",
+    "message": "Pool will be closed for cleaning from 6:00 AM to 10:00 AM tomorrow",
+    "priority": "medium",
+    "timestamp": "2024-01-15T09:45:00Z",
+    "read": false,
+    "category": "maintenance"
+  },
+  {
+    "Id": 8,
+    "type": "guest",
+    "title": "Guest Complaint Resolved",
+    "message": "Noise complaint from Room 304 has been successfully addressed",
+    "priority": "medium",
+    "timestamp": "2024-01-15T08:20:00Z",
+    "read": true,
+    "category": "guest-services"
+  },
+  {
+    "Id": 9,
+    "type": "security",
+    "title": "Security System Update",
+    "message": "New access cards have been programmed for conference rooms",
+    "priority": "low",
+    "timestamp": "2024-01-15T07:30:00Z",
+    "read": true,
+    "category": "security"
+  },
+  {
+    "Id": 10,
+    "type": "booking",
+    "title": "Overbooking Alert",
+    "message": "Potential overbooking situation for next weekend - review required",
+    "priority": "high",
+    "timestamp": "2024-01-14T16:45:00Z",
+    "read": false,
+    "category": "operations"
+  }
+]

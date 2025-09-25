@@ -1,0 +1,152 @@
+[
+  {
+    "Id": 1,
+    "type": "check-in",
+    "title": "Guest Check-in",
+    "description": "Sarah Johnson checked into Room 305",
+    "timestamp": "2024-01-15T14:30:00Z",
+    "user": "Sarah Johnson",
+    "room": "305",
+    "status": "completed"
+  },
+  {
+    "Id": 2,
+    "type": "maintenance",
+    "title": "Maintenance Completed",
+    "description": "Fixed air conditioning in Room 218",
+    "timestamp": "2024-01-15T13:45:00Z",
+    "user": "Mike Rodriguez",
+    "room": "218",
+    "status": "completed"
+  },
+  {
+    "Id": 3,
+    "type": "booking",
+    "title": "New Booking",
+    "description": "Conference booking for 25 guests",
+    "timestamp": "2024-01-15T12:20:00Z",
+    "user": "Corporate Events",
+    "room": "Conference Hall A",
+    "status": "confirmed"
+  },
+  {
+    "Id": 4,
+    "type": "service",
+    "title": "Room Service Order",
+    "description": "Continental breakfast delivered to Room 412",
+    "timestamp": "2024-01-15T11:15:00Z",
+    "user": "David Chen",
+    "room": "412",
+    "status": "delivered"
+  },
+  {
+    "Id": 5,
+    "type": "housekeeping",
+    "title": "Room Cleaned",
+    "description": "Deep cleaning completed for Room 156",
+    "timestamp": "2024-01-15T10:30:00Z",
+    "user": "Maria Santos",
+    "room": "156",
+    "status": "completed"
+  },
+  {
+    "Id": 6,
+    "type": "payment",
+    "title": "Payment Received",
+    "description": "$456.75 payment processed for booking #BK2024-0847",
+    "timestamp": "2024-01-15T09:45:00Z",
+    "user": "System",
+    "room": null,
+    "status": "processed"
+  },
+  {
+    "Id": 7,
+    "type": "check-out",
+    "title": "Guest Check-out",
+    "description": "Robert Williams checked out of Room 201",
+    "timestamp": "2024-01-15T08:30:00Z",
+    "user": "Robert Williams",
+    "room": "201",
+    "status": "completed"
+  },
+  {
+    "Id": 8,
+    "type": "inquiry",
+    "title": "Guest Inquiry",
+    "description": "Special dietary request for Room 789",
+    "timestamp": "2024-01-15T08:00:00Z",
+    "user": "Lisa Thompson",
+    "room": "789",
+    "status": "resolved"
+  },
+  {
+    "Id": 9,
+    "type": "maintenance",
+    "title": "Equipment Check",
+    "description": "Elevator maintenance completed successfully",
+    "timestamp": "2024-01-15T07:15:00Z",
+    "user": "TechCorp Services",
+    "room": "Elevator Bank 1",
+    "status": "completed"
+  },
+  {
+    "Id": 10,
+    "type": "booking",
+    "title": "Booking Modified",
+    "description": "Extended stay for 2 additional nights",
+    "timestamp": "2024-01-15T06:45:00Z",
+    "user": "Amanda Foster",
+    "room": "567",
+    "status": "confirmed"
+  },
+  {
+    "Id": 11,
+    "type": "service",
+    "title": "Concierge Request",
+    "description": "Restaurant reservation made for guest",
+    "timestamp": "2024-01-14T22:30:00Z",
+    "user": "James Wilson",
+    "room": "890",
+    "status": "arranged"
+  },
+  {
+    "Id": 12,
+    "type": "housekeeping",
+    "title": "Linen Restocked",
+    "description": "Fresh linens supplied to all vacant rooms",
+    "timestamp": "2024-01-14T21:15:00Z",
+    "user": "Night Shift Team",
+    "room": "Multiple",
+    "status": "completed"
+  },
+  {
+    "Id": 13,
+    "type": "security",
+    "title": "Security Check",
+    "description": "Perimeter security inspection completed",
+    "timestamp": "2024-01-14T20:00:00Z",
+    "user": "Security Team",
+    "room": null,
+    "status": "completed"
+  },
+  {
+    "Id": 14,
+    "type": "system",
+    "title": "System Update",
+    "description": "Property management system updated successfully",
+    "timestamp": "2024-01-14T19:30:00Z",
+    "user": "IT Department",
+    "room": null,
+    "status": "completed"
+  },
+  {
+    "Id": 15,
+    "type": "payment",
+    "title": "Refund Processed",
+    "description": "$125.00 refund issued for cancelled reservation",
+    "timestamp": "2024-01-14T18:45:00Z",
+    "user": "Finance Team",
+    "room": null,
+    "status": "processed"
+  }
+]

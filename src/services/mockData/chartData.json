@@ -1,0 +1,53 @@
+{
+  "revenue": {
+    "series": [
+      {
+        "name": "Room Revenue",
+        "data": [142000, 158000, 176000, 168000, 195000, 210000, 225000, 198000, 187000, 201000, 178000, 165000]
+      },
+      {
+        "name": "F&B Revenue", 
+        "data": [38000, 42000, 45000, 41000, 48000, 52000, 55000, 49000, 46000, 51000, 44000, 40000]
+      },
+      {
+        "name": "Other Services",
+        "data": [12000, 15000, 18000, 16000, 20000, 23000, 25000, 22000, 19000, 21000, 17000, 14000]
+      }
+    ],
+    "categories": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    "total": 2847000
+  },
+  "occupancy": {
+    "series": [
+      {
+        "name": "Occupancy Rate",
+        "data": [78, 82, 85, 81, 89, 92, 95, 88, 84, 87, 80, 76]
+      }
+    ],
+    "categories": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    "average": 84.8
+  },
+  "adr": {
+    "series": [
+      {
+        "name": "Average Daily Rate",
+        "data": [165, 172, 178, 175, 185, 192, 198, 188, 182, 189, 176, 170]
+      }
+    ],
+    "categories": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    "average": 179.2
+  },
+  "trends": {
+    "revenueGrowth": 12.8,
+    "occupancyGrowth": 5.2,
+    "adrGrowth": 8.1
+  },
+  "forecasting": {
+    "nextMonth": {
+      "revenue": 172000,
+      "occupancy": 83,
+      "adr": 175
+    },
+    "confidence": 89
+  }
+}
